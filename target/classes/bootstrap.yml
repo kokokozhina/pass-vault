@@ -1,7 +1,0 @@
-spring:
-    application:
-        name: passvault
-    cloud:
-        vault:
-            token: s.1HkAPuFdYKWJ2KtQjKHTVEQx
-            scheme: http

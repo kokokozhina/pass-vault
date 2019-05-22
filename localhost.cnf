@@ -1,0 +1,25 @@
+#
+# localhost.cnf
+#
+
+[ req ]
+prompt = no
+distinguished_name = server_distinguished_name
+req_extensions = v3_req
+
+[ server_distinguished_name ]
+commonName = localhost
+stateOrProvinceName = Saratov
+countryName = RU
+emailAddress = support.team@blahblahblah.com
+organizationName =  PassVault
+organizationalUnitName = Development
+
+[ v3_req ]
+basicConstraints = CA:FALSE
+keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+subjectAltName = @alt_names
+
+[ alt_names ]
+DNS.0 = localhost
+DNS.1 = passvault.local

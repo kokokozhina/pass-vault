@@ -1,13 +1,28 @@
-### Cтартовать vault:
+### Prerequisitives (enabling TLS for localhost):
 
-1 терминал: 
+1. generate self-signed certificate with localhost in SAN via the article 
+https://gist.github.com/jchandra74/36d5f8d0e11960dd8f80260801109ab0#creating-your-self-signed-certificate-with-subject-alternative-name-san
+2. add it in jvm keystore
+
+		keytool -import -keystore /usr/lib/jvm/java-8-oracle/jre/lib/security/cacerts 
+		-trustcacerts -alias "Self-Signed Certificate for TLS for Vault 1" 
+		-file /home/kokokozhina/myCA/server_crt.pem 
+    (default password for jvm keystore is ‘changeit’; please also put your own path to jre)
+   
+    
+
+### Start vault server:
+
+in the first terminal: 
 
 	vault server -config vault.conf
 	
-2 терминал: 
+in the second terminal: 
 			
-	export VAULT_ADDR=http://127.0.0.1:8200
+	export VAULT_ADDR=https://127.0.0.1:8200
 	vault operator init -key-shares=5 -key-threshold=2
-	vault unseal <ключ> - столько же, сколько и -key-threshold
+	vault unseal <key> //execute this command as many times as it's pointed in -key-threshold with the different unseal keys respectively 
 	export VAULT_TOKEN=<root token>
 	vault secrets enable -path=secret kv
+	
+	
