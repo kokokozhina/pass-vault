@@ -15,7 +15,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.client.OAuth2ClientContext;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
 
 
 @Slf4j
@@ -24,7 +28,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/")
 public class AuthController {
 
-    private static final String LOGIN_ENDPOINT = "/login";
+    private static final String LOGIN_ENDPOINT = "/login2";
     private static final String REGISTER_ENDPOINT = "/register";
 
     private static final String INCORRECT_LOGIN_OR_PASSWORD = "Неверный логин или пароль";
@@ -34,6 +38,7 @@ public class AuthController {
 
     @Autowired
     private UserService userService;
+
 
     @ResponseBody
     @RequestMapping(value = LOGIN_ENDPOINT, method = RequestMethod.POST, consumes = {"application/json"})
@@ -65,6 +70,11 @@ public class AuthController {
         } else {
             return new ResponseEntity<>(json, HttpStatus.CONFLICT);
         }
+    }
+
+    @RequestMapping("/user")
+    public Principal user(Principal principal) {
+        return principal;
     }
 
 }

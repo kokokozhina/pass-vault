@@ -33,11 +33,11 @@ public class SwaggerConfig {
 
     private ApiInfo apiInfo() {
         return new ApiInfo(
-                "My REST API",
-                "Some custom description of API.",
+                "Pass-Vault REST API",
+                "Some custom description of API for Pass-Vault.",
                 "API TOS",
                 "Terms of service",
-                new Contact("John Doe", "www.example.com", "myeaddress@company.com"),
+                new Contact("Olga Kozhina", "www.kokokozhina.com", "mes@kokokozhina.com"),
                 "License of API", "API license URL", Collections.emptyList());
     }
 

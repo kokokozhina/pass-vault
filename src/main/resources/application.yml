@@ -1,0 +1,27 @@
+server.port: 8080
+
+spring:
+  jpa:
+    hibernate.ddl-auto: update
+    properties.hibernate.dialect: org.hibernate.dialect.MySQL55Dialect
+  datasource:
+    url: ${MYSQL_CONNECTION_STRING:jdbc:mysql://localhost:3306/vault_me}
+    username: ${MYSQL_USERNAME:vault-me-admin}
+    password: ${MYSQL_PASSWORD:vault-me-admin}
+  mvc:
+    view:
+      prefix: /WEB-INF/jsp/
+      suffix: .jsp
+
+
+facebook:
+  client:
+    clientId: 2503401659672150
+    clientSecret: 2f7ed95451a31b1a2f7f626587e700c6
+    accessTokenUri: https://graph.facebook.com/oauth/access_token
+    userAuthorizationUri: https://www.facebook.com/dialog/oauth
+    tokenName: oauth_token
+    authenticationScheme: query
+    clientAuthenticationScheme: form
+  resource:
+    userInfoUri: https://graph.facebook.com/me
