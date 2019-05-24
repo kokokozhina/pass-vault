@@ -2,14 +2,17 @@ package com.kokokozhina.diploma.configuration;
 
 import com.kokokozhina.diploma.model.User;
 import com.kokokozhina.diploma.model.enums.Role;
+import com.kokokozhina.diploma.service.SecretService;
 import com.kokokozhina.diploma.service.UserService;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.AuthoritiesExtractor;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.FixedAuthoritiesExtractor;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.FixedPrincipalExtractor;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.PrincipalExtractor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.OAuth2RestOperations;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
@@ -35,6 +38,7 @@ public class OAuth2AuthConfig implements ResourceServerTokenServices {
     private AuthoritiesExtractor authoritiesExtractor = new FixedAuthoritiesExtractor();
     private PrincipalExtractor principalExtractor = new FixedPrincipalExtractor();
     private UserService userService;
+    private SecretService secretService;
     private PasswordEncoder passwordEncoder;
 
     public OAuth2AuthConfig() {
@@ -79,6 +83,23 @@ public class OAuth2AuthConfig implements ResourceServerTokenServices {
         this.principalExtractor = principalExtractor;
     }
 
+    public SecretService getSecretService() {
+        return secretService;
+    }
+
+    public void setSecretService(SecretService secretService) {
+        this.secretService = secretService;
+    }
+
+    private String getPrefix() {
+        if (this.userInfoEndpointUrl.contains("facebook")) {
+            return "f_";
+        } else if (this.userInfoEndpointUrl.contains("github")) {
+            return "g_";
+        }
+        return "";
+    }
+
     @Override
     public OAuth2Authentication loadAuthentication(String accessToken)
             throws AuthenticationException, InvalidTokenException {
@@ -88,21 +109,18 @@ public class OAuth2AuthConfig implements ResourceServerTokenServices {
             String name = map.get("name").toString();
             String login = map.get("id").toString();
 
-            String prefix = "";
-            if (this.userInfoEndpointUrl.contains("facebook")) {
-                prefix = "f_";
-            } else if (this.userInfoEndpointUrl.contains("github")) {
-                prefix = "g_";
-            }
-
-            User user = userService.findUserByLogin(prefix + login);
+            User user = userService.findUserByLogin(getPrefix() + login);
 
             if (user == null) {
                 user = new User();
                 user.setName(name);
-                user.setLogin(prefix + login);
+                user.setLogin(getPrefix() + login);
+                if (map.containsKey("email") && map.get("email") != null) {
+                    user.setEmail(map.get("email").toString());
+                }
                 user.setPassword(passwordEncoder.encode("oauth2user"));
                 user.setRole(Role.USER);
+                secretService.initUserSecrets(user);
                 userService.save(user);
             }
         }
@@ -121,20 +139,13 @@ public class OAuth2AuthConfig implements ResourceServerTokenServices {
         OAuth2Request request = new OAuth2Request(null, this.clientId, null, true, null,
                 null, null, null, null);
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
-                principal, "N/A", authorities);
+                getPrefix() + principal, "N/A", authorities);
         token.setDetails(map);
         return new OAuth2Authentication(request, token);
     }
 
-    /**
-     * Return the principal that should be used for the token. The default implementation
-     * delegates to the {@link PrincipalExtractor}.
-     *
-     * @param map the source map
-     * @return the principal or {@literal "unknown"}
-     */
     protected Object getPrincipal(Map<String, Object> map) {
-        Object principal = this.principalExtractor.extractPrincipal(map);
+        Object principal = map.get("id");
         return (principal == null ? "unknown" : principal);
     }
 
@@ -162,7 +173,7 @@ public class OAuth2AuthConfig implements ResourceServerTokenServices {
             }
             return restTemplate.getForEntity(path, Map.class).getBody();
         } catch (Exception ex) {
-            return Collections.<String, Object>singletonMap("error",
+            return Collections.singletonMap("error",
                     "Could not fetch user details");
         }
     }

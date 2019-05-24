@@ -19,6 +19,7 @@ public class User implements Serializable {
     @Column(unique = true)
     private String email;
 
+    @Transient
     private String password;
 
     @Enumerated(EnumType.STRING)

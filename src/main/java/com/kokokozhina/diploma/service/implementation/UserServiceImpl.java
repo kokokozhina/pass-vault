@@ -3,6 +3,7 @@ package com.kokokozhina.diploma.service.implementation;
 import com.kokokozhina.diploma.model.User;
 import com.kokokozhina.diploma.model.enums.Role;
 import com.kokokozhina.diploma.repository.UserRepository;
+import com.kokokozhina.diploma.service.SecretService;
 import com.kokokozhina.diploma.service.UserService;
 import com.kokokozhina.diploma.service.validation.UserServiceValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserServiceValidator userServiceValidator;
 
+    @Autowired
+    private SecretService secretService;
+
     @Override
     public void save(User user) {
         userRepository.save(user);
@@ -38,7 +42,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    @Cacheable("user")
+//    @Cacheable("user")
     public User findUserByLogin(String login) {
         return userRepository.findUserByLogin(login);
     }
@@ -50,6 +54,7 @@ public class UserServiceImpl implements UserService {
         if (errors.isEmpty()) {
             user.setRole(Role.USER);
             user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+            secretService.initUserSecrets(user);
             save(user);
         }
 

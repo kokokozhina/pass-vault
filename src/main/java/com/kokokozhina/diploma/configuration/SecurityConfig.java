@@ -1,5 +1,6 @@
 package com.kokokozhina.diploma.configuration;
 
+import com.kokokozhina.diploma.service.SecretService;
 import com.kokokozhina.diploma.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -48,6 +49,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private SecretService secretService;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -108,6 +112,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 client.getClient().getClientId());
         tokenServices.setRestTemplate(oAuth2RestTemplate);
         tokenServices.setUserService(userService);
+        tokenServices.setSecretService(secretService);
         tokenServices.setPasswordEncoder(bCryptPasswordEncoder());
         oAuth2ClientAuthenticationFilter.setTokenServices(tokenServices);
         return oAuth2ClientAuthenticationFilter;

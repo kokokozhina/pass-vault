@@ -47,7 +47,8 @@ public class SecretController {
             model.addAttribute("secrets", secrets.stream()
                     .map(x -> x.getKey().equals(secretName) ? secret : x)
                     .collect(Collectors.toList()));
-            model.addAttribute("name", SecurityContextHolder.getContext().getAuthentication().getName());
+            model.addAttribute("name", userService.findUserByLogin(SecurityContextHolder
+                    .getContext().getAuthentication().getName()).getName());
             return "main";
         } catch (Exception e) {
             model.addAttribute("secretsListError", "Произошла ошибка");
@@ -69,7 +70,7 @@ public class SecretController {
     @GetMapping(value = MAIN_ENDPOINT)
     public String main(Model model) {
         model.addAttribute("name", userService.findUserByLogin(SecurityContextHolder
-                .getContext().getAuthentication().getName()));
+                .getContext().getAuthentication().getName()).getName());
         model.addAttribute("secrets", getSecretsList());
         return "main";
     }

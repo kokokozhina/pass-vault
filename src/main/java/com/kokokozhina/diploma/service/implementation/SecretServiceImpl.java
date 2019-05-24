@@ -1,6 +1,7 @@
 package com.kokokozhina.diploma.service.implementation;
 
 import com.kokokozhina.diploma.model.Secret;
+import com.kokokozhina.diploma.model.User;
 import com.kokokozhina.diploma.model.UsersSecrets;
 import com.kokokozhina.diploma.repository.UsersSecretsRepository;
 import com.kokokozhina.diploma.service.SecretService;
@@ -27,10 +28,6 @@ public class SecretServiceImpl implements SecretService {
         if (userSecrets.isPresent()) {
             userSecrets.get().getSecrets().put(secret.getKey(), secret.getValue());
             repo.save(userSecrets.get());
-        } else {
-            Map<String, String> attrs = new HashMap<>();
-            attrs.put(secret.getKey(), secret.getValue());
-            repo.save(new UsersSecrets(login, attrs));
         }
     }
 
@@ -41,6 +38,12 @@ public class SecretServiceImpl implements SecretService {
             userSecrets.get().getSecrets().remove(secretName);
             repo.save(userSecrets.get());
         }
+    }
+
+    @Override
+    public void initUserSecrets(User user) {
+        Map<String, String> attrs = new HashMap<>();
+        repo.save(new UsersSecrets(user.getLogin(), user.getPassword(), attrs));
     }
 
     @Override
