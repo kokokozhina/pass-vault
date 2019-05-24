@@ -1,93 +1,67 @@
 package com.kokokozhina.diploma.service.validation;
 
-import com.kokokozhina.diploma.dto.ResponseWrapperRegistrationValidator;
 import com.kokokozhina.diploma.model.User;
 import com.kokokozhina.diploma.repository.UserRepository;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.kokokozhina.diploma.service.validation.ValidationMessages.*;
 
 @Service
 public class UserServiceValidator {
+    private Map<String, String> errors;
 
     @Autowired
     private UserRepository userRepository;
 
-    private String checkLogin(String login, MutableBoolean isOk) {
+    private void checkLogin(String login) {
         if (login == null || login.length() < 3) {
-            isOk.setFalse();
-            return LOGIN_LENGTH;
+            errors.put("login", LOGIN_LENGTH);
+            return;
         }
 
         User user = userRepository.findUserByLogin(login);
         if(user != null) {
-            isOk.setFalse();
-            return LOGIN_NOT_UNIQUE;
+            errors.put("login", LOGIN_NOT_UNIQUE);
+            return;
         }
-        return OK;
     }
 
-    private String checkPassword(String password, MutableBoolean isOk) {
+    private void checkPassword(String password) {
         if (password == null || !password.matches(PASSWORD_REGEX)) {
-            isOk.setFalse();
-            return PASSWORD_POLICY;
+            errors.put("password", PASSWORD_POLICY);
         }
-
-        return OK;
     }
 
-    private String checkNotEmpty(String field, MutableBoolean isOk) {
-        if (StringUtils.isBlank(field)) {
-            isOk.setFalse();
-            return FIELD_IS_EMPTY;
+    private void checkName(String name) {
+        if (name.isEmpty()) {
+            errors.put("name", FIELD_IS_EMPTY);
         }
-
-        return OK;
     }
 
-
-    private String checkPhone(String phone, MutableBoolean isOk) {
-        if (phone == null || !phone.matches(PHONE_REGEX)) {
-            isOk.setFalse();
-            return PHONE_INCORRECT;
-        }
-
-        User user = userRepository.findUserByPhone(phone);
-        if(user != null) {
-            isOk.setFalse();
-            return PHONE_NOT_UNIQUE;
-        }
-
-        return OK;
-    }
-
-    private String checkEmail(String email, MutableBoolean isOk) {
+    private void checkEmail(String email) {
         if (email == null || !email.matches(EMAIL_REGEX)) {
-            isOk.setFalse();
-            return EMAIL_INCORRECT;
+            errors.put("email", EMAIL_INCORRECT);
+            return;
         }
 
         User user = userRepository.findUserByEmail(email);
         if(user != null) {
-            isOk.setFalse();
-            return EMAIL_NOT_UNIQUE;
+            errors.put("email", EMAIL_NOT_UNIQUE);
+            return;
         }
-
-        return OK;
     }
 
-    public ResponseWrapperRegistrationValidator validate(User user) {
-        MutableBoolean userDataIsOk = new MutableBoolean(true);
-        return new ResponseWrapperRegistrationValidator(
-                checkLogin(user.getLogin(), userDataIsOk),
-                checkPassword(user.getPassword(), userDataIsOk),
-                checkNotEmpty(user.getName(), userDataIsOk),
-                checkPhone(user.getPhone(), userDataIsOk),
-                checkEmail(user.getEmail(), userDataIsOk),
-                userDataIsOk.getValue());
+    public Map<String, String> validate(User user) {
+        errors = new HashMap<>();
+        checkLogin(user.getLogin());
+        checkEmail(user.getEmail());
+        checkName(user.getName());
+        checkPassword(user.getPassword());
+        return errors;
     }
 
 }

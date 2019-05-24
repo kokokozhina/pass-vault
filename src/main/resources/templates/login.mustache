@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:=http://www.w3.org/1999/xhtml>
+<head>
+	{{> meta}}
+	<title>Вход</title>
+</head>
+<body>
+<section class="container">
+	<div class="mx-auto border my-5 py-3 px-3 form">
+        <div class="my-3" align="center">
+            <h3>PassVault - сервис безопасного хранения секретов</h3>
+        </div>
+		<form action="/login" method="post">
+			<div class="form-group">
+				<label for="login">Логин</label>
+				<input class="form-control" id="login" type="text" name="login">
+			</div>
+			<div class="form-group">
+				<label for="password">Пароль</label>
+				<input class="form-control" id="password" type="password" name="password">
+                {{#error}}
+                    <b>{{error}}</b>
+                {{/error}}
+			</div>
+			<input type="hidden" name="_csrf" value="{{_csrf.token}}"/>
+			<input class="button" type="submit" value="Вход"/>
+			<div align="center">
+				<a href="/login/facebook">Войти через Facebook</a>
+			</div>
+            <div align="center">
+                <a href="/login/github">Войти через Github</a>
+            </div>
+            <div align="center">
+                <a href="/register">Зарегистрироваться</a>
+            </div>
+		</form>
+	</div>
+</section>
+</body>
+</html>

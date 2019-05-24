@@ -1,6 +1,5 @@
 package com.kokokozhina.diploma.service.implementation;
 
-
 import com.kokokozhina.diploma.model.User;
 import com.kokokozhina.diploma.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;

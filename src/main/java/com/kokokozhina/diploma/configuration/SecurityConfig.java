@@ -1,16 +1,14 @@
 package com.kokokozhina.diploma.configuration;
 
+import com.kokokozhina.diploma.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerProperties;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.UserInfoTokenServices;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.CacheControl;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -24,18 +22,12 @@ import org.springframework.security.oauth2.client.filter.OAuth2ClientAuthenticat
 import org.springframework.security.oauth2.client.filter.OAuth2ClientContextFilter;
 import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeResourceDetails;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
-import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
-import org.springframework.web.servlet.resource.WebJarsResourceResolver;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.filter.CompositeFilter;
 
 import javax.servlet.Filter;
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -54,24 +46,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private OAuth2ClientContext oAuth2ClientContext;
 
+    @Autowired
+    private UserService userService;
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable();
-
         http.authorizeRequests()
-                .antMatchers(HttpMethod.OPTIONS).permitAll()
-                .antMatchers("index", "/index.jsp", "/index", "/", "/error**", "/register", "/login**", "/live",
-                        "/swagger-resources/**", "/swagger-ui.html", "/v2/api-docs", "/webjars/**").permitAll()
-                .anyRequest().authenticated();
+            .antMatchers("/resources/**", "/", "/login**", "/register").permitAll()
+            .anyRequest().authenticated()
+            .and().logout().logoutSuccessUrl("/").permitAll();
 
-        http.addFilterBefore(ssoFilter(), BasicAuthenticationFilter.class);
-
-        http.logout()
-                .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler(HttpStatus.OK))
-                .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID");
-
-        http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
+        http.addFilterBefore(ssoFilter(), UsernamePasswordAuthenticationFilter.class);
     }
 
     @Bean
@@ -81,28 +66,22 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurerAdapter() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**")
-                        .allowCredentials(true)
-                        .allowedHeaders("*")
-                        .allowedMethods("GET", "POST", "OPTIONS");
-            }
-        };
-    }
-
-    @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Bean
-    @ConfigurationProperties("facebook.client")
-    public AuthorizationCodeResourceDetails facebook() {
-        return new AuthorizationCodeResourceDetails();
+    @ConfigurationProperties("github")
+    public ClientResources github() {
+        return new ClientResources();
     }
+
+    @Bean
+    @ConfigurationProperties("facebook")
+    public ClientResources facebook() {
+        return new ClientResources();
+    }
+
 
     @Bean
     public FilterRegistrationBean<OAuth2ClientContextFilter> oauth2ClientFilterRegistration(OAuth2ClientContextFilter filter) {
@@ -112,24 +91,42 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return registration;
     }
 
-    @Bean
-    @ConfigurationProperties("facebook.resource")
-    public ResourceServerProperties facebookResource() {
-        return new ResourceServerProperties();
-    }
-
     private Filter ssoFilter() {
-        OAuth2ClientAuthenticationProcessingFilter facebookFilter = new OAuth2ClientAuthenticationProcessingFilter("/login/facebook");
-        OAuth2RestTemplate facebookTemplate = new OAuth2RestTemplate(facebook(), oAuth2ClientContext);
-        facebookFilter.setRestTemplate(facebookTemplate);
-        UserInfoTokenServices tokenServices = new UserInfoTokenServices(facebookResource().getUserInfoUri(),
-                facebook().getClientId());
-        tokenServices.setRestTemplate(facebookTemplate);
-        facebookFilter.setTokenServices(tokenServices);
-        facebookFilter.setAuthenticationSuccessHandler(new SavedRequestAwareAuthenticationSuccessHandler());
-        return facebookFilter;
+        CompositeFilter filter = new CompositeFilter();
+        List<Filter> filters = new ArrayList<>();
+        filters.add(ssoFilter(facebook(), "/login/facebook"));
+        filters.add(ssoFilter(github(), "/login/github"));
+        filter.setFilters(filters);
+        return filter;
     }
 
+    private Filter ssoFilter(ClientResources client, String path) {
+        OAuth2ClientAuthenticationProcessingFilter oAuth2ClientAuthenticationFilter = new OAuth2ClientAuthenticationProcessingFilter(path);
+        OAuth2RestTemplate oAuth2RestTemplate = new OAuth2RestTemplate(client.getClient(), oAuth2ClientContext);
+        oAuth2ClientAuthenticationFilter.setRestTemplate(oAuth2RestTemplate);
+        OAuth2AuthConfig tokenServices = new OAuth2AuthConfig(client.getResource().getUserInfoUri(),
+                client.getClient().getClientId());
+        tokenServices.setRestTemplate(oAuth2RestTemplate);
+        tokenServices.setUserService(userService);
+        tokenServices.setPasswordEncoder(bCryptPasswordEncoder());
+        oAuth2ClientAuthenticationFilter.setTokenServices(tokenServices);
+        return oAuth2ClientAuthenticationFilter;
+    }
+}
 
+class ClientResources {
 
+    @NestedConfigurationProperty
+    private AuthorizationCodeResourceDetails client = new AuthorizationCodeResourceDetails();
+
+    @NestedConfigurationProperty
+    private ResourceServerProperties resource = new ResourceServerProperties();
+
+    public AuthorizationCodeResourceDetails getClient() {
+        return client;
+    }
+
+    public ResourceServerProperties getResource() {
+        return resource;
+    }
 }
