@@ -5,48 +5,61 @@
     <title>Регистрация</title>
 </head>
 <body>
-<section class="container">
+<div class="page-login__container container">
     <div class="mx-auto border my-5 py-3 px-3 form">
         <div class="my-3" align="center">
-            <h3>Регистрация</h3>
+            <div class="my-3" align="center">
+                <h3 class="page-login__name1">PassVault</h3>
+                <h6 class="page-login__name2">Регистрация</h6>
+            </div>
         </div>
         <form action="register" method="post">
             <div class="form-group">
                 <label for="name">Логин</label>
                 <input class="form-control" id="login" type="text" name="login">
-                {{#loginErrorMessage}}
-                    <b>{{loginErrorMessage}}</b>
-                {{/loginErrorMessage}}
+                <div class="error">
+                    {{#loginErrorMessage}}
+                        <b>{{loginErrorMessage}}</b>
+                    {{/loginErrorMessage}}
+                </div>
             </div>
             <div class="form-group">
                 <label for="name">Имя</label>
                 <input class="form-control" id="name" type="text" name="name">
-                {{#nameErrorMessage}}
-                    <b>{{nameErrorMessage}}</b>
-                {{/nameErrorMessage}}
+                <div class="error">
+                    {{#nameErrorMessage}}
+                        <b>{{nameErrorMessage}}</b>
+                    {{/nameErrorMessage}}
+                </div>
             </div>
             <div class="form-group">
                 <label for="email">Email</label>
                 <input class="form-control" id="email" type="text" name="email">
-                {{#emailErrorMessage}}
-                    <b>{{emailErrorMessage}}</b>
-                {{/emailErrorMessage}}
+                <div class="error">
+                    {{#emailErrorMessage}}
+                        <b>{{emailErrorMessage}}</b>
+                    {{/emailErrorMessage}}
+                </div>
             </div>
             <div class="form-group">
                 <label for="password">Пароль</label>
                 <input class="form-control" id="password" type="password" name="password">
-                {{#passwordErrorMessage}}
-                    <b>{{passwordErrorMessage}}</b>
-                {{/passwordErrorMessage}}
+                <div class="error">
+                    {{#passwordErrorMessage}}
+                        <b>{{passwordErrorMessage}}</b>
+                    {{/passwordErrorMessage}}
+                </div>
             </div>
             <div class="form-group">
                 <label for="password">Повторите пароль</label>
                 <input class="form-control" id="passwordRepeat" type="password" name="passwordRepeat">
             </div>
-            <input type="hidden" name="_csrf" value="{{_csrf.token}}"/>
-            <input class="button" type="submit" value="Регистрация"/>
+            <div class="center">
+                <input type="hidden" name="_csrf" value="{{_csrf.token}}"/>
+                <input class="btn btn-primary login-btn" type="submit" value="Зарегистрироваться"/>
+            </div>
         </form>
     </div>
-</section>
+</div>
 </body>
 </html>
