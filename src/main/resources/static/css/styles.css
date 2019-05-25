@@ -1,0 +1,81 @@
+.page-login__container {
+    width: 700px;
+    position: relative;
+}
+
+.page-login__name2 {
+    color: darkgrey;
+}
+
+.login-link {
+    display: inline-block;
+    color: #3b5998;
+}
+
+.login-link__icon {
+    font-size: 50px;
+}
+
+.login-link__icon--git {
+    color: #333;
+}
+
+.login-btn {
+    width: 200px;
+}
+
+.login-text {
+    display: block;
+    margin: 20px 0;
+}
+
+.main-btn__icon {
+    font-size: 50px;
+}
+.btn-exit {
+    position: absolute;
+    right: 20px;
+    top: 5px;
+}
+
+.btn-plus {
+    display: inline-block;
+    background: lightgray;
+    border-radius: 20px;
+    padding: 15px;
+    font-size: 20px;
+    color: white;
+    transition: color 100ms linear;
+}
+.btn-plus:hover {
+    color: #007bff;
+}
+
+.table-secrets tr {
+    background: white;
+}
+.table-secrets tr:nth-child(2n) {
+    background: #f9f9f9;
+}
+.table-secrets tr td{
+    vertical-align: middle;
+}
+
+.table-secrets__btn {
+    font-size: 20px;
+}
+
+/*
+    Common
+*/
+.center {
+    width: 100%;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.error {
+    color: #dc3545;
+}
+
+

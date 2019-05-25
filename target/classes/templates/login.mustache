@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:=http://www.w3.org/1999/xhtml>
+<head>
+	{{> meta}}
+	<title>Вход</title>
+</head>
+<body>
+<div class="page-login__container container">
+	<div class="mx-auto border my-5 py-3 px-3 form">
+        <div class="my-3" align="center">
+            <h3 class="page-login__name1">PassVault</h3>
+            <h6 class="page-login__name2">Cервис для безопасного хранения секретов</h6>
+        </div>
+		<form action="/login" method="post">
+			<div class="form-group">
+				<label for="login">Логин</label>
+				<input class="form-control" id="login" type="text" name="login">
+			</div>
+			<div class="form-group">
+				<label for="password">Пароль</label>
+				<input class="form-control" id="password" type="password" name="password">
+                <div class="error">
+                    {{#error}}
+                        <b>{{error}}</b>
+                    {{/error}}
+                </div>
+			</div>
+			<input type="hidden" name="_csrf" value="{{_csrf.token}}"/>
+            <div class="center">
+			    <input class="btn btn-primary login-btn" type="submit" value="Вход"/>
+                <a href="/register" class="login-btn btn btn-secondary">Зарегистрироваться</a>
+                <div class="login-text">
+                Войти через:
+                </div>
+                <a href="/login/facebook" class="login-link"><i class="login-link__icon fab fa-facebook-square"></i></a>
+
+                <a href="/login/github" class="login-link"><i class="login-link__icon login-link__icon--git fab fa-github-square"></i></a>
+            </div>
+            <div class="center">
+            </div>
+		</form>
+	</div>
+</div>
+</body>
+</html>

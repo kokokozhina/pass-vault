@@ -25,4 +25,15 @@ in the second terminal:
 	export VAULT_TOKEN=<root token>
 	vault secrets enable -path=secret kv
 	
+### Инициализация базы данных
+
+1. установить mysql с дефолтным пользователем root и паролем root
+2. зайти в бд, используя командную строку: mysql -u root -p root 
+3. ввести следующие команды:
+```
+create database if not exists vault_me character set utf8;
+create user 'vault_me_admin'@'%' identified by 'vault_me_admin';
+grant all privileges on vault_me.* to 'vault_me_admin'@'%';
+flush privileges;
+```
 	

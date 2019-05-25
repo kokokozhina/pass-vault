@@ -1,19 +1,20 @@
 package com.kokokozhina.diploma.service.implementation;
 
-import com.kokokozhina.diploma.dto.ResponseWrapperRegistrationValidator;
 import com.kokokozhina.diploma.model.User;
 import com.kokokozhina.diploma.model.enums.Role;
 import com.kokokozhina.diploma.repository.UserRepository;
+import com.kokokozhina.diploma.service.SecretService;
 import com.kokokozhina.diploma.service.UserService;
 import com.kokokozhina.diploma.service.validation.UserServiceValidator;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
-@Slf4j
+
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -25,6 +26,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserServiceValidator userServiceValidator;
+
+    @Autowired
+    private SecretService secretService;
 
     @Override
     public void save(User user) {
@@ -38,22 +42,23 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
+//    @Cacheable("user")
     public User findUserByLogin(String login) {
         return userRepository.findUserByLogin(login);
     }
 
 
     @Override
-    public ResponseWrapperRegistrationValidator register(User user) {
-        ResponseWrapperRegistrationValidator json = userServiceValidator.validate(user);
-        if (json.isOk()) {
+    public Map<String, String> register(User user) {
+        Map<String, String> errors = userServiceValidator.validate(user);
+        if (errors.isEmpty()) {
             user.setRole(Role.USER);
             user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+            secretService.initUserSecrets(user);
             save(user);
-
         }
 
-        return json;
+        return errors;
     }
 
     @Override

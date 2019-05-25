@@ -1,0 +1,39 @@
+server.port: 8080
+
+spring:
+  jpa:
+    hibernate.ddl-auto: create
+    properties:
+      connection:
+        characterEncoding: utf-8
+        CharSet: utf-8
+        useUnicode: true
+  datasource:
+    url: ${MYSQL_CONNECTION_STRING:jdbc:mysql://localhost:3306/vault_me?useUnicode=yes&amp;characterEncoding=utf8}
+    username: ${MYSQL_USERNAME:vault_me_admin}
+    password: ${MYSQL_PASSWORD:vault_me_admin}
+    driver-class-name: com.mysql.jdbc.Driver
+  mustache:
+    expose-request-attributes: true
+
+facebook:
+  client:
+    clientId: 2503401659672150
+    clientSecret: 21be2e9da658528c7d4add772979cd85
+    accessTokenUri: https://graph.facebook.com/oauth/access_token
+    userAuthorizationUri: https://www.facebook.com/dialog/oauth
+    tokenName: oauth_token
+    authenticationScheme: query
+    clientAuthenticationScheme: form
+  resource:
+    userInfoUri: https://graph.facebook.com/me
+
+github:
+  client:
+    clientId: 065ea6fe201f7cc65966
+    clientSecret: 1677ea43ac813be0e5e35b89d5dc7f2464d0c4fc
+    accessTokenUri: https://github.com/login/oauth/access_token
+    userAuthorizationUri: https://github.com/login/oauth/authorize
+    clientAuthenticationScheme: form
+  resource:
+    userInfoUri: https://api.github.com/user

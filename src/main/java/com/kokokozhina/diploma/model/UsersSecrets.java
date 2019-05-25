@@ -7,11 +7,13 @@ import java.util.Map;
 
 @Secret
 public class UsersSecrets {
-    @Id String id;
-    Map<String, String> secrets;
+    @Id private String id;
+    private String password;
+    private Map<String, String> secrets;
 
-    public UsersSecrets(String id, Map<String, String> secrets) {
+    public UsersSecrets(String id, String password, Map<String, String> secrets) {
         this.id = id;
+        this.password = password;
         this.secrets = secrets;
     }
 
@@ -32,5 +34,13 @@ public class UsersSecrets {
 
     public void setSecrets(Map<String, String> secrets) {
         this.secrets = secrets;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

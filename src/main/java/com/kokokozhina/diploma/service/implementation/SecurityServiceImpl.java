@@ -1,7 +1,6 @@
 package com.kokokozhina.diploma.service.implementation;
 
 import com.kokokozhina.diploma.service.SecurityService;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -12,7 +11,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 @Service
-@Slf4j
 public class SecurityServiceImpl implements SecurityService {
 
     @Autowired
@@ -45,11 +43,9 @@ public class SecurityServiceImpl implements SecurityService {
 
             if (authenticationToken.isAuthenticated()) {
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-                log.info("User with login=" + login + " was successfully authenticated");
             }
         } catch (Exception e) {
             SecurityContextHolder.getContext().setAuthentication(null);
-            log.info("User with login=" + login + " cannot be authenticated");
         }
     }
 }
